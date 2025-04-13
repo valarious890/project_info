@@ -99,5 +99,3 @@ if not filtered_df.empty:
 
 else:
     st.warning("⚠️ No fixations found for this video and time range. Try adjusting filters.")
-
-streamlit run app.py
