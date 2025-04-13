@@ -26,4 +26,7 @@ st.markdown(f"""
 st.session_state["selected_video"] = selected_video
 
 # Navigation button to viewer
-st.page_link("pages/Gaze_Viewer.py", label="🔍 View Gaze Visualization", icon="🎯")
+if st.button("🔍 View Gaze Visualization"):
+    st.switch_page("pages/Gaze_Viewer.py")
+
+
