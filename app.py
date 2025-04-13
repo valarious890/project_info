@@ -18,24 +18,24 @@ def load_data():
 
 df = load_data()
 
-# ========== Sidebar Filters ==========
-st.sidebar.header("Filters")
+# ========== Filters on Main Page ==========
+st.header("🔍 Filter Options")
 
 video_ids = df['videoNumber'].unique()
-selected_video = st.sidebar.selectbox("🎞️ Select Video Number", sorted(video_ids))
+selected_video = st.selectbox("🎞️ Select Video Number", sorted(video_ids))
 
 video_df = df[df['videoNumber'] == selected_video]
 
 # Show basic video info
-st.write(f"📊 Total fixations for video {selected_video}: {len(video_df)}")
-st.write(f"⏱️ Time range: {video_df['t_sec'].min()}s to {video_df['t_sec'].max()}s")
+st.markdown(f"📊 Total fixations for video **{selected_video}**: {len(video_df)}")
+st.markdown(f"⏱️ Time range: **{video_df['t_sec'].min()}s** to **{video_df['t_sec'].max()}s**")
 
 # Dynamically adjust slider range to available time
 t_min = int(video_df['t_sec'].min())
 t_max = int(video_df['t_sec'].max())
 
 start_time, end_time = st.slider(
-    "Select Time Range (seconds)",
+    "⏲️ Select Time Range (seconds)",
     min_value=t_min,
     max_value=t_max,
     value=(t_min, min(t_min + 5, t_max))
@@ -100,4 +100,4 @@ if not filtered_df.empty:
 else:
     st.warning("⚠️ No fixations found for this video and time range. Try adjusting filters.")
 
-
+streamlit run app.py
