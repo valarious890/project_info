@@ -4,18 +4,26 @@ import pandas as pd
 st.set_page_config(page_title="Video Overview", layout="wide")
 st.title("🎬 30s Video Segment Descriptions")
 
-# Load descriptions
+# Load video descriptions
 desc = pd.read_csv("https://drive.google.com/uc?export=download&id=1_5OPeORG8vE2c40G-ceACmnQhwFaj9NQ")
 
-# Simulate or map to eye-tracking videoNumbers
-desc["videoNumber"] = desc["ch"]  # Change this line if needed
+# Clean videoNumber
+desc = desc[desc["ch"].notna()]
+desc["videoNumber"] = desc["ch"].astype(int)
 
-# Display list of video segments with links to viewer page
-for _, row in desc.iterrows():
-    st.markdown(f"""
-    ### 🎞️ {row['movie name']} - Segment {int(row['videoNumber'])}
-    ⏱️ Duration: {row['length']}  
-    🌍 Environment: {row['environment']}  
-    👀 [View Gaze Visualization ▶️](Gaze_Viewer?video={int(row['videoNumber'])})
-    ---
-    """)
+# Let user select a video
+selected_video = st.selectbox("🎞️ Select a video segment to view", sorted(desc["videoNumber"].unique()))
+
+# Show segment metadata
+selected_row = desc[desc["videoNumber"] == selected_video].iloc[0]
+st.markdown(f"""
+### 📝 {selected_row['movie name']}
+⏱️ Duration: {selected_row['length']} seconds  
+🌍 Environment: {selected_row['environment']}  
+""")
+
+# Save selected video to session state for next page
+st.session_state["selected_video"] = selected_video
+
+# Navigation button to viewer
+st.page_link("pages/Gaze_Viewer.py", label="🔍 View Gaze Visualization", icon="🎯")
