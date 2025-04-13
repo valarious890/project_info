@@ -7,9 +7,9 @@ st.title("🎬 30s Video Segment Descriptions")
 # Load video descriptions
 desc = pd.read_csv("https://drive.google.com/uc?export=download&id=1_5OPeORG8vE2c40G-ceACmnQhwFaj9NQ")
 
-# Clean videoNumber
-desc = desc[desc["ch"].notna()]
-desc["videoNumber"] = desc["ch"].astype(int)
+# Keep only rows where 'ch' is a number
+desc = desc[pd.to_numeric(desc["ch"], errors="coerce").notna()]
+desc["videoNumber"] = desc["ch"].astype(float).astype(int)
 
 # Let user select a video
 selected_video = st.selectbox("🎞️ Select a video segment to view", sorted(desc["videoNumber"].unique()))
