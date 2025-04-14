@@ -15,38 +15,6 @@ df["genre_label"] = df["genre_label"].str.strip().str.lower()
 music_df = df[df["genre_label"] == "music"]
 thriller_df = df[df["genre_label"] == "thriller"]
 
-# Optional: Add videoNumber if missing (use 'ch' column)
-df = df[pd.to_numeric(df["ch"], errors="coerce").notna()]
-df["videoNumber"] = df["ch"].astype(float).astype(int)
-
-col1, col2 = st.columns(2)
-
-with col1:
-    st.subheader("🎵 Music Segments")
-    for _, row in music_df.iterrows():
-        st.markdown(f"""
-        **🎞️ {row['movie name']}**  
-        ⏱️ Length: {row['length']}  
-        🌍 Env: {row['environment']}  
-        👁️ Video: `{int(row['ch'])}`  
-        """)
-        if st.button(f"🔍 View Gaze (Music {int(row['ch'])})", key=f"music-{row['ch']}"):
-            st.session_state["selected_video"] = int(row["ch"])
-            st.switch_page("pages/Gaze_Viewer.py")
-
-with col2:
-    st.subheader("🎬 Thriller Segments")
-    for _, row in thriller_df.iterrows():
-        st.markdown(f"""
-        **🎞️ {row['movie name']}**  
-        ⏱️ Length: {row['length']}  
-        🌍 Env: {row['environment']}  
-        👁️ Video: `{int(row['ch'])}`  
-        """)
-        if st.button(f"🔍 View Gaze (Thriller {int(row['ch'])})", key=f"thriller-{row['ch']}"):
-            st.session_state["selected_video"] = int(row["ch"])
-            st.switch_page("pages/Gaze_Viewer.py")
-
 import plotly.express as px
 
 st.header("📊 Visual & Audio Feature Comparison")
