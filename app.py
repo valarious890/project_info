@@ -1,26 +1,23 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="Music vs Thriller", layout="wide")
+st.set_page_config(page_title="Music vs Thriller Comparison", layout="wide")
 st.title("🎬 Genre Comparison: Music vs Thriller")
 
-# Load video descriptions
-desc = pd.read_csv("https://drive.google.com/uc?export=download&id=1DkCDAFLUMP3wqioDJEa8aL3YldkQ4nWt")
+# Load the filtered genre dataset
+url = "https://drive.google.com/uc?export=download&id=1DkCDAFLUMP3wqioDJEa8aL3YldkQ4nWt"  # replace if needed
+df = pd.read_csv(url)
 
-# Keep only rows where 'ch' is a number
-desc = desc[pd.to_numeric(desc["ch"], errors="coerce").notna()]
-desc["videoNumber"] = desc["ch"].astype(float).astype(int)
+# Clean genre labels
+df["genre_label"] = df["genre_label"].str.strip().str.lower()
 
-# Clean genre column (optional: make lowercase, strip spaces)
-desc["genre"] = desc["genre"].str.strip().str.lower()
+# Filter genres
+music_df = df[df["genre_label"] == "music"]
+thriller_df = df[df["genre_label"] == "thriller"]
 
-# Define the two genres to compare
-genre1 = "music"
-genre2 = "thriller"
-
-# Filter segments by genre
-music_df = desc[desc["genre"] == genre1]
-thriller_df = desc[desc["genre"] == genre2]
+# Optional: Add videoNumber if missing (use 'ch' column)
+df = df[pd.to_numeric(df["ch"], errors="coerce").notna()]
+df["videoNumber"] = df["ch"].astype(float).astype(int)
 
 col1, col2 = st.columns(2)
 
@@ -29,12 +26,12 @@ with col1:
     for _, row in music_df.iterrows():
         st.markdown(f"""
         **🎞️ {row['movie name']}**  
-        ⏱️ Duration: {row['length']}s  
+        ⏱️ Length: {row['length']}  
         🌍 Env: {row['environment']}  
-        👁️ Video: `{int(row['videoNumber'])}`  
+        👁️ Video: `{int(row['ch'])}`  
         """)
-        if st.button(f"🔍 View Gaze: Music {int(row['videoNumber'])}", key=f"music-{row['videoNumber']}"):
-            st.session_state["selected_video"] = int(row["videoNumber"])
+        if st.button(f"🔍 View Gaze (Music {int(row['ch'])})", key=f"music-{row['ch']}"):
+            st.session_state["selected_video"] = int(row["ch"])
             st.switch_page("pages/Gaze_Viewer.py")
 
 with col2:
@@ -42,12 +39,12 @@ with col2:
     for _, row in thriller_df.iterrows():
         st.markdown(f"""
         **🎞️ {row['movie name']}**  
-        ⏱️ Duration: {row['length']}s  
+        ⏱️ Length: {row['length']}  
         🌍 Env: {row['environment']}  
-        👁️ Video: `{int(row['videoNumber'])}`  
+        👁️ Video: `{int(row['ch'])}`  
         """)
-        if st.button(f"🔍 View Gaze: Thriller {int(row['videoNumber'])}", key=f"thriller-{row['videoNumber']}"):
-            st.session_state["selected_video"] = int(row["videoNumber"])
+        if st.button(f"🔍 View Gaze (Thriller {int(row['ch'])})", key=f"thriller-{row['ch']}"):
+            st.session_state["selected_video"] = int(row["ch"])
             st.switch_page("pages/Gaze_Viewer.py")
 
 
