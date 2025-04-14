@@ -5,36 +5,31 @@ import plotly.express as px
 st.set_page_config(page_title="Music vs Thriller Comparison", layout="wide")
 st.title("Music vs Thriller")
 
-# Force dark theme styling
+# Dark mode
 st.markdown("""
-    <style>
-    body {
-        background-color: #1e1e1e;
-        color: white;
-    }
-    .reportview-container {
-        background-color: #1e1e1e;
-        color: white;
-    }
-    .sidebar .sidebar-content {
-        background-color: #1e1e1e;
-    }
-    .st-bb, .st-at, .st-c3, .st-ag, .st-af, .st-dv {
-        background-color: #1e1e1e;
-        color: white;
-    }
-    .st-cq, .st-da, .st-db, .st-dc, .st-dd, .st-de {
-        background-color: #262730;
-    }
-    .css-1v3fvcr {
-        background-color: #1e1e1e;
-    }
-    .stTextInput > div > div > input {
-        background-color: #262730;
-        color: white;
-    }
-    </style>
+<style>
+div[data-baseweb="radio"] > div {
+    flex-direction: row !important;
+    justify-content: center;
+}
+div[role="radiogroup"] > div {
+    margin-right: 1rem;
+    border: 1px solid #444;
+    padding: 0.5rem 1.5rem;
+    border-radius: 10px;
+    background-color: #202020;  /* dark gray like the chart */
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+}
+div[role="radiogroup"] > div[data-selected="true"] {
+    background-color: #5bc0de;
+    color: black;
+    border: 2px solid #4aa4c4;
+}
+</style>
 """, unsafe_allow_html=True)
+
 
 # --- Load Data ---
 genre_url = "https://drive.google.com/uc?export=download&id=1DkCDAFLUMP3wqioDJEa8aL3YldkQ4nWt"
@@ -114,38 +109,41 @@ st.plotly_chart(fig4, use_container_width=True)
 # --- Section: Fixation Viewer ---
 st.header("👁️ Fixation & Gaze Visualization")
 
-# Genre selector
+# --- Genre Toggle Styled as Tabs ---
 st.markdown("""
 <style>
 div[data-baseweb="radio"] > div {
-    flex-direction: row !important;
-    justify-content: center;
+   flex-direction: row !important;
+   justify-content: center;
 }
 div[role="radiogroup"] > div {
-    margin-right: 1rem;
-    border: 1px solid #999;
-    padding: 0.5rem 1.5rem;
-    border-radius: 10px;
-    background-color: #ddd;
-    font-weight: bold;
-    color: black;
-    cursor: pointer;
+   margin-right: 1rem;
+   border: 1px solid #999;
+   padding: 0.5rem 1.5rem;
+   border-radius: 10px;
+   background-color: #ddd;
+   font-weight: bold;
+   color: black;
+   cursor: pointer;
 }
 div[role="radiogroup"] > div[data-selected="true"] {
-    background-color: #5bc0de;
-    color: black;
-    border: 2px solid #4aa4c4;
+   background-color: #5bc0de;
+   color: black;
+   border: 2px solid #4aa4c4;
 }
 </style>
 """, unsafe_allow_html=True)
 
+
+# Use st.radio with horizontal layout (acts like toggle)
 genre_selected = st.radio(
-    "🎵 Choose Genre",
-    options=["music", "thriller"],
-    index=0 if "genre_selected" not in st.session_state else ["music", "thriller"].index(st.session_state.genre_selected),
-    horizontal=True,
-    key="genre_selected"
+   "🎵 Choose Genre",
+   options=["music", "thriller"],
+   index=0 if "genre_selected" not in st.session_state else ["music", "thriller"].index(st.session_state.genre_selected),
+   horizontal=True,
+   key="genre_selected"
 )
+
 
 video_options = sorted(gaze[gaze["genre_label"] == genre_selected]["videoNumber"].unique())
 selected_video = st.selectbox("🎞️ Select Video Number", video_options)
