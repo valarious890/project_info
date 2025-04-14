@@ -6,24 +6,27 @@ st.set_page_config(page_title="Music vs Thriller Comparison", layout="wide")
 st.title("Music vs Thriller")
 
 # === Section 1: Static Genre Images ===
-st.subheader("🎞️ Sample Frames")
-col1, col2 = st.columns(2)
-with col1:
-    st.image("https://via.placeholder.com/300x200.png?text=Music+Scene", caption="Music Scene")
-with col2:
-    st.image("https://via.placeholder.com/300x200.png?text=Thriller+Scene", caption="Thriller Scene")
+#st.subheader("🎞️ Sample Frames")
+#col1, col2 = st.columns(2)
+#with col1:
+    #st.image("https://via.placeholder.com/300x200.png?text=Music+Scene", caption="Music Scene")
+#with col2:
+    #st.image("https://via.placeholder.com/300x200.png?text=Thriller+Scene", caption="Thriller Scene")
 
 # === Section 2: Load and Prepare Data ===
 # Genre metadata
 genre_url = "https://drive.google.com/uc?export=download&id=1DkCDAFLUMP3wqioDJEa8aL3YldkQ4nWt"
 df = pd.read_csv(genre_url)
 df["genre_label"] = df["genre_label"].str.strip().str.lower()
+#st.write("Gaze Data Columns:", df.columns.tolist())
 
 # Gaze data
-gaze = pd.read_csv("https://drive.google.com/uc?export=download&id=1J9qXgI8WBO0-6HmXTVcw67XY8BEclSlf")
+gaze = pd.read_csv("https://huggingface.co/datasets/valarious890/genre_eye_tracking/resolve/main/genre_eye_tracking.csv")
+
 gaze = gaze[gaze["missing"] == 0]
 gaze["t_sec"] = gaze["t"] / 1000
 
+df["videoNumber"] = df.index
 df["videoNumber"] = df["videoNumber"].astype(int)
 gaze["videoNumber"] = gaze["videoNumber"].astype(int)
 
