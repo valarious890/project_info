@@ -79,7 +79,12 @@ fig_radar = px.line_polar(
 )
 
 # Rename legend label
-fig_radar.update_layout(legend_title_text="Genre")
+fig_radar.update_layout(
+    legend_title_text="Genre",
+    height=650,  # Increased height
+    width=800,   # Increased width
+    margin=dict(t=50, b=50, l=50, r=50)
+)
 
 # Padding with column spacing
 left, center, right = st.columns([1, 10, 1])
