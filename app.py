@@ -14,12 +14,12 @@ df["videoNumber"] = df["index"].astype(int)
 gaze = pd.read_csv("https://huggingface.co/datasets/valarious890/genre_eye_tracking/resolve/main/fixation_eye_tracking.csv")
 
 gaze = gaze[gaze["missing"] == 0]
+gaze = gaze[(gaze['x'] >= 0) & (gaze['y'] >= 0)]
+
 gaze["videoNumber"] = gaze["videoNumber"].astype(int)
 
 # Merge genre label into gaze data
 gaze = gaze.merge(df[["videoNumber", "genre_label", "movie name"]], on="videoNumber", how="left")
-st.write(gaze[["x", "y"]].describe())
-
 
 # --- Section: Radar Chart Only ---
 st.header("📈 Radar Chart: Feature Profiles")
@@ -120,7 +120,7 @@ else:
     # scatter by timestamp
     fig_fix = px.scatter(
         fixation_filtered,
-        x="x", y="y", color="fixation_label", size="duration",
+        x="x", y="y", color="fixation_label",
         title=f"Fixation Plot - {genre_selected.title()} | {movie_name} | Video {selected_video}, Observer {selected_mapped}",
         height=500,
         color_discrete_map={"fixation": "red", "non-fixation": "gray"}
