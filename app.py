@@ -1,124 +1,91 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 st.set_page_config(page_title="Music vs Thriller Comparison", layout="wide")
 st.title("Music vs Thriller")
 
-# Genre page buttons (placed directly below the title)
-col1, col2 = st.columns([1, 1])
+# === Section 1: Static Genre Images ===
+st.subheader("🎞️ Sample Frames")
+col1, col2 = st.columns(2)
 with col1:
-    if st.button("🎵 Go to Music Page"):
-        st.switch_page("Music_Only")
-
+    st.image("https://via.placeholder.com/300x200.png?text=Music+Scene", caption="Music Scene")
 with col2:
-    if st.button("🎬 Go to Thriller Page"):
-        st.switch_page("Thriller_Only")
+    st.image("https://via.placeholder.com/300x200.png?text=Thriller+Scene", caption="Thriller Scene")
 
-# Load the filtered genre dataset
-url = "https://drive.google.com/uc?export=download&id=1DkCDAFLUMP3wqioDJEa8aL3YldkQ4nWt"  # replace if needed
-df = pd.read_csv(url)
-
-# Clean genre labels
+# === Section 2: Load and Prepare Data ===
+# Genre metadata
+genre_url = "https://drive.google.com/uc?export=download&id=1DkCDAFLUMP3wqioDJEa8aL3YldkQ4nWt"
+df = pd.read_csv(genre_url)
 df["genre_label"] = df["genre_label"].str.strip().str.lower()
 
-# Filter genres
-music_df = df[df["genre_label"] == "music"]
-thriller_df = df[df["genre_label"] == "thriller"]
+# Gaze data
+gaze = pd.read_csv("https://drive.google.com/uc?export=download&id=1J9qXgI8WBO0-6HmXTVcw67XY8BEclSlf")
+gaze = gaze[gaze["missing"] == 0]
+gaze["t_sec"] = gaze["t"] / 1000
 
-import plotly.express as px
+df["videoNumber"] = df["videoNumber"].astype(int)
+gaze["videoNumber"] = gaze["videoNumber"].astype(int)
 
+# === Section 3: Feature Comparison (Bar + Radar) ===
 st.header("📊 Visual & Audio Feature Comparison")
-
-# Compute average values for each genre
-feature_cols = [
-    "# cuts", "faces (0-5)", "human figures (0-5)", "nature (0-5)",
-    "man-made objects (0-5)", "light (0-5)", "aud. Info"
-]
+feature_cols = ["# cuts", "faces (0-5)", "human figures (0-5)", "nature (0-5)",
+                "man-made objects (0-5)", "light (0-5)", "aud. Info"]
 genre_summary = df.groupby("genre_label")[feature_cols].mean().reset_index()
 
-# Melt data for plotting
 melted = genre_summary.melt(id_vars="genre_label", var_name="feature", value_name="average_score")
-
-# Plot as grouped bar chart
-fig = px.bar(
-    melted,
-    x="feature",
-    y="average_score",
-    color="genre_label",
-    barmode="group",
-    title="🔍 Average Visual & Audio Features: Music vs Thriller",
+fig1 = px.bar(
+    melted, x="feature", y="average_score", color="genre_label",
+    barmode="group", title="🔍 Average Visual & Audio Features: Music vs Thriller",
     labels={"average_score": "Avg Score", "feature": "Feature", "genre_label": "Genre"}
 )
-
-fig.update_layout(xaxis_tickangle=-45)
-st.plotly_chart(fig, use_container_width=True)
-
-import plotly.express as px
+fig1.update_layout(xaxis_tickangle=-45)
+st.plotly_chart(fig1, use_container_width=True)
 
 st.header("📈 Radar Chart: Feature Profiles")
-
-# Compute mean values for each genre
-feature_cols = [
-    "faces (0-5)", "human figures (0-5)", "nature (0-5)",
-    "man-made objects (0-5)", "light (0-5)", "aud. Info"
-]
-genre_summary = df.groupby("genre_label")[feature_cols].mean().reset_index()
-
-# Rename columns for readability
-genre_summary = genre_summary.rename(columns={
-    "faces (0-5)": "Faces",
-    "human figures (0-5)": "Humans",
-    "nature (0-5)": "Nature",
-    "man-made objects (0-5)": "Objects",
-    "light (0-5)": "Light",
-    "aud. Info": "Audio"
+radar_cols = ["faces (0-5)", "human figures (0-5)", "nature (0-5)",
+              "man-made objects (0-5)", "light (0-5)", "aud. Info"]
+radar_summary = df.groupby("genre_label")[radar_cols].mean().reset_index()
+radar_summary = radar_summary.rename(columns={
+    "faces (0-5)": "Faces", "human figures (0-5)": "Humans", "nature (0-5)": "Nature",
+    "man-made objects (0-5)": "Objects", "light (0-5)": "Light", "aud. Info": "Audio"
 })
-
-# Melt for radar plot
-melted = genre_summary.melt(id_vars="genre_label", var_name="Feature", value_name="Average Score")
-
-# Radar plot
-fig = px.line_polar(
-    melted,
-    r="Average Score",
-    theta="Feature",
-    color="genre_label",
-    line_close=True,
-    markers=True,
-    title="🎯 Feature Comparison: Music vs Thriller"
+melted_radar = radar_summary.melt(id_vars="genre_label", var_name="Feature", value_name="Average Score")
+fig2 = px.line_polar(
+    melted_radar, r="Average Score", theta="Feature", color="genre_label",
+    line_close=True, markers=True, title="🎯 Feature Comparison: Music vs Thriller"
 )
+st.plotly_chart(fig2, use_container_width=True)
 
-st.plotly_chart(fig, use_container_width=True)
-
-import plotly.express as px
-
+# === Section 4: Visual Style ===
 st.header("🎥 Genre Visual Style Analysis")
-
-# Light category frequency per genre
 light_counts = df.groupby(["genre_label", "light category"]).size().reset_index(name="count")
-light_fig = px.bar(
-    light_counts,
-    x="light category",
-    y="count",
-    color="genre_label",
-    barmode="group",
-    title="💡 Light Category Frequency by Genre",
-    labels={"count": "Count", "light category": "Light Category", "genre_label": "Genre"}
-)
-st.plotly_chart(light_fig, use_container_width=True)
+fig3 = px.bar(light_counts, x="light category", y="count", color="genre_label",
+              barmode="group", title="💡 Light Category Frequency by Genre")
+st.plotly_chart(fig3, use_container_width=True)
 
-# Environment frequency per genre
 env_counts = df.groupby(["genre_label", "environment"]).size().reset_index(name="count")
-env_fig = px.bar(
-    env_counts,
-    x="environment",
-    y="count",
-    color="genre_label",
-    barmode="group",
-    title="🌍 Environment Frequency by Genre",
-    labels={"count": "Count", "environment": "Environment", "genre_label": "Genre"}
-)
-st.plotly_chart(env_fig, use_container_width=True)
+fig4 = px.bar(env_counts, x="environment", y="count", color="genre_label",
+              barmode="group", title="🌍 Environment Frequency by Genre")
+st.plotly_chart(fig4, use_container_width=True)
 
-import streamlit as st
-st.write(st.runtime.scriptrunner.script_run_context.get_script_run_context().pages)
+# === Section 5: Fixation & Gaze Viewer ===
+st.header("👁️ Fixation & Gaze Visualization")
+video_options = sorted(gaze["videoNumber"].unique())
+selected_video = st.selectbox("Select Video Number", video_options)
+observer_options = sorted(gaze[gaze["videoNumber"] == selected_video]["observer"].unique())
+selected_observer = st.selectbox("Select Observer", observer_options)
+
+gaze_filtered = gaze[(gaze["videoNumber"] == selected_video) & (gaze["observer"] == selected_observer)]
+
+if gaze_filtered.empty:
+    st.warning("No gaze data available for this combination.")
+else:
+    fig5 = px.scatter(
+        gaze_filtered, x="x", y="y", size="pa", color="t_sec", animation_frame="t_sec",
+        title=f"Animated Fixation - Video {selected_video}, Observer {selected_observer}",
+        height=500, color_continuous_scale="Viridis"
+    )
+    fig5.update_yaxes(autorange='reversed')
+    fig5.update_layout(xaxis_title="X Position", yaxis_title="Y Position")
+    st.plotly_chart(fig5, use_container_width=True)
