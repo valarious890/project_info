@@ -108,7 +108,7 @@ light_fig = px.bar(
 st.plotly_chart(light_fig, use_container_width=True)
 
 # Environment frequency per genre
-env_counts = genre_df.groupby(["genre_label", "environment"]).size().reset_index(name="count")
+env_counts = df.groupby(["genre_label", "environment"]).size().reset_index(name="count")
 env_fig = px.bar(
     env_counts,
     x="environment",
