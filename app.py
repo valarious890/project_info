@@ -110,34 +110,38 @@ env_fig = px.bar(
 )
 st.plotly_chart(env_fig, use_container_width=True)
 
-
-#sub pages
 # Bottom sticky navigation bar
+import streamlit.components.v1 as components
+
+# Render styled buttons in the sticky footer
 st.markdown("""
 <style>
-.sticky-footer {
+div.stButton > button {
+    margin: 0 15px;
+}
+.sticky-footer-container {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     background-color: #f0f2f6;
-    padding: 10px 20px;
     border-top: 1px solid #ddd;
+    padding: 10px 0;
+    z-index: 9999;
     display: flex;
     justify-content: center;
-    gap: 40px;
-    z-index: 9999;
-}
-.sticky-footer a {
-    text-decoration: none;
-    font-weight: bold;
-    color: #1f77b4;
-    font-size: 16px;
 }
 </style>
-
-<div class="sticky-footer">
-    <a href="/Music_Only" target="_self">🎵 Music Page</a>
-    <a href="/Thriller_Only" target="_self">🎬 Thriller Page</a>
-</div>
+<div class="sticky-footer-container">
 """, unsafe_allow_html=True)
+
+col1, col2 = st.columns([1, 1])
+with col1:
+    if st.button("🎵 Go to Music Page"):
+        st.switch_page("pages/Music_Only.py")
+
+with col2:
+    if st.button("🎬 Go to Thriller Page"):
+        st.switch_page("pages/Thriller_Only.py")
+
+st.markdown("</div>", unsafe_allow_html=True)
