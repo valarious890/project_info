@@ -86,7 +86,7 @@ st.header("🎥 Genre Visual Style Analysis")
 
 # Average number of cuts per genre
 cut_fig = px.bar(
-    genre_df.groupby("genre_label", as_index=False)["# cuts"].mean(),
+    df.groupby("genre_label", as_index=False)["# cuts"].mean(),
     x="genre_label",
     y="# cuts",
     title="✂️ Average Number of Cuts per Genre",
@@ -95,7 +95,7 @@ cut_fig = px.bar(
 st.plotly_chart(cut_fig, use_container_width=True)
 
 # Light category frequency per genre
-light_counts = genre_df.groupby(["genre_label", "light category"]).size().reset_index(name="count")
+light_counts = df.groupby(["genre_label", "light category"]).size().reset_index(name="count")
 light_fig = px.bar(
     light_counts,
     x="light category",
