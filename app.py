@@ -47,4 +47,31 @@ with col2:
             st.session_state["selected_video"] = int(row["ch"])
             st.switch_page("pages/Gaze_Viewer.py")
 
+import plotly.express as px
+
+st.header("📊 Visual & Audio Feature Comparison")
+
+# Compute average values for each genre
+feature_cols = [
+    "faces (0-5)", "human figures (0-5)", "nature (0-5)",
+    "man-made objects (0-5)", "light (0-5)", "aud. Info"
+]
+genre_summary = df.groupby("genre_label")[feature_cols].mean().reset_index()
+
+# Melt data for plotting
+melted = genre_summary.melt(id_vars="genre_label", var_name="feature", value_name="average_score")
+
+# Plot as grouped bar chart
+fig = px.bar(
+    melted,
+    x="feature",
+    y="average_score",
+    color="genre_label",
+    barmode="group",
+    title="🔍 Average Visual & Audio Features: Music vs Thriller",
+    labels={"average_score": "Avg Score", "feature": "Feature", "genre_label": "Genre"}
+)
+
+fig.update_layout(xaxis_tickangle=-45)
+st.plotly_chart(fig, use_container_width=True)
 
