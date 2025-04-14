@@ -21,7 +21,7 @@ st.header("📊 Visual & Audio Feature Comparison")
 
 # Compute average values for each genre
 feature_cols = [
-    "faces (0-5)", "human figures (0-5)", "nature (0-5)",
+    "# cuts", "faces (0-5)", "human figures (0-5)", "nature (0-5)",
     "man-made objects (0-5)", "light (0-5)", "aud. Info"
 ]
 genre_summary = df.groupby("genre_label")[feature_cols].mean().reset_index()
@@ -83,16 +83,6 @@ st.plotly_chart(fig, use_container_width=True)
 import plotly.express as px
 
 st.header("🎥 Genre Visual Style Analysis")
-
-# Average number of cuts per genre
-cut_fig = px.bar(
-    df.groupby("genre_label", as_index=False)["# cuts"].mean(),
-    x="genre_label",
-    y="# cuts",
-    title="✂️ Average Number of Cuts per Genre",
-    labels={"# cuts": "Avg # of Cuts", "genre_label": "Genre"}
-)
-st.plotly_chart(cut_fig, use_container_width=True)
 
 # Light category frequency per genre
 light_counts = df.groupby(["genre_label", "light category"]).size().reset_index(name="count")
