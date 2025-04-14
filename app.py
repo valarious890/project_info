@@ -26,9 +26,12 @@ gaze = pd.read_csv("https://huggingface.co/datasets/valarious890/genre_eye_track
 gaze = gaze[gaze["missing"] == 0]
 gaze["t_sec"] = gaze["t"] / 1000
 
-df["videoNumber"] = df.index
+df["videoNumber"] = df["index"]
 df["videoNumber"] = df["videoNumber"].astype(int)
 gaze["videoNumber"] = gaze["videoNumber"].astype(int)
+
+#merge gaze data
+gaze = gaze.merge(df[["videoNumber", "genre_label"]], on="videoNumber", how="left")
 
 # === Section 3: Feature Comparison (Bar + Radar) ===
 st.header("📊 Visual & Audio Feature Comparison")
@@ -78,18 +81,17 @@ st.header("👁️ Fixation & Gaze Visualization")
 # === Genre Selector ===
 genre_selected = st.radio(
     "Select Genre",
-    options=["music", "thriller"],
+    options=gaze["genre_label"].dropna().unique().tolist(),
     index=0,
     horizontal=True
 )
 
-# === Filter video numbers based on genre ===
-filtered_df = df[df["genre_label"] == genre_selected]
-video_options = sorted(filtered_df["videoNumber"].unique())
+# === Filter video numbers based on selected genre (from gaze data) ===
+video_options = sorted(gaze[gaze["genre_label"] == genre_selected]["videoNumber"].unique())
 selected_video = st.selectbox("🎞️ Select Video Number", video_options)
 
 # === Observer options filtered by video number ===
-observer_options = sorted(gaze[gaze["videoNumber"] == selected_video]["observer"].unique())
+observer_options = sorted(gaze[(gaze["videoNumber"] == selected_video)]["observer"].unique())
 selected_observer = st.selectbox("👁️ Select Observer", observer_options)
 
 # === Filter gaze data ===
