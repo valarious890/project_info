@@ -81,10 +81,28 @@ fig_radar = px.line_polar(
 # Rename legend label
 fig_radar.update_layout(
     legend_title_text="Genre",
-    height=500,  # Increased height
-    width=650,   # Increased width
-    margin=dict(t=50, b=50, l=50, r=50)
+    height=500,
+    width=650,
+    margin=dict(t=50, b=50, l=50, r=50),
+    paper_bgcolor="#0E0E10",   # match Streamlit dark background
+    plot_bgcolor="#0E0E10",
+    font=dict(color="white"),
+    polar=dict(
+        bgcolor="#0E0E10",
+        radialaxis=dict(
+            gridcolor="gray",
+            linecolor="gray",
+            tickfont=dict(color="white"),
+            tickangle=0,
+        ),
+        angularaxis=dict(
+            gridcolor="gray",
+            linecolor="gray",
+            tickfont=dict(color="white")
+        )
+    )
 )
+
 
 # Padding with column spacing
 left, center, right = st.columns([1, 10, 1])
