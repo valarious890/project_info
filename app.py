@@ -79,3 +79,45 @@ fig = px.line_polar(
 )
 
 st.plotly_chart(fig, use_container_width=True)
+
+import plotly.express as px
+
+st.header("🎥 Genre Visual Style Analysis")
+
+# Average number of cuts per genre
+cut_fig = px.bar(
+    genre_df.groupby("genre_label", as_index=False)["# cuts"].mean(),
+    x="genre_label",
+    y="# cuts",
+    title="✂️ Average Number of Cuts per Genre",
+    labels={"# cuts": "Avg # of Cuts", "genre_label": "Genre"}
+)
+st.plotly_chart(cut_fig, use_container_width=True)
+
+# Light category frequency per genre
+light_counts = genre_df.groupby(["genre_label", "light category"]).size().reset_index(name="count")
+light_fig = px.bar(
+    light_counts,
+    x="light category",
+    y="count",
+    color="genre_label",
+    barmode="group",
+    title="💡 Light Category Frequency by Genre",
+    labels={"count": "Count", "light category": "Light Category", "genre_label": "Genre"}
+)
+st.plotly_chart(light_fig, use_container_width=True)
+
+# Environment frequency per genre
+env_counts = genre_df.groupby(["genre_label", "environment"]).size().reset_index(name="count")
+env_fig = px.bar(
+    env_counts,
+    x="environment",
+    y="count",
+    color="genre_label",
+    barmode="group",
+    title="🌍 Environment Frequency by Genre",
+    labels={"count": "Count", "environment": "Environment", "genre_label": "Genre"}
+)
+st.plotly_chart(env_fig, use_container_width=True)
+
+
