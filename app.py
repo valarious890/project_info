@@ -74,21 +74,36 @@ st.plotly_chart(fig4, use_container_width=True)
 
 # === Section 5: Fixation & Gaze Viewer ===
 st.header("👁️ Fixation & Gaze Visualization")
-video_options = sorted(gaze["videoNumber"].unique())
-selected_video = st.selectbox("Select Video Number", video_options)
-observer_options = sorted(gaze[gaze["videoNumber"] == selected_video]["observer"].unique())
-selected_observer = st.selectbox("Select Observer", observer_options)
 
+# === Genre Selector ===
+genre_selected = st.radio(
+    "Select Genre",
+    options=["music", "thriller"],
+    index=0,
+    horizontal=True
+)
+
+# === Filter video numbers based on genre ===
+filtered_df = df[df["genre_label"] == genre_selected]
+video_options = sorted(filtered_df["videoNumber"].unique())
+selected_video = st.selectbox("🎞️ Select Video Number", video_options)
+
+# === Observer options filtered by video number ===
+observer_options = sorted(gaze[gaze["videoNumber"] == selected_video]["observer"].unique())
+selected_observer = st.selectbox("👁️ Select Observer", observer_options)
+
+# === Filter gaze data ===
 gaze_filtered = gaze[(gaze["videoNumber"] == selected_video) & (gaze["observer"] == selected_observer)]
 
+# === Plot ===
 if gaze_filtered.empty:
     st.warning("No gaze data available for this combination.")
 else:
-    fig5 = px.scatter(
+    fig_gaze = px.scatter(
         gaze_filtered, x="x", y="y", size="pa", color="t_sec", animation_frame="t_sec",
-        title=f"Animated Fixation - Video {selected_video}, Observer {selected_observer}",
+        title=f"Animated Fixation - {genre_selected.title()} | Video {selected_video}, Observer {selected_observer}",
         height=500, color_continuous_scale="Viridis"
     )
-    fig5.update_yaxes(autorange='reversed')
-    fig5.update_layout(xaxis_title="X Position", yaxis_title="Y Position")
-    st.plotly_chart(fig5, use_container_width=True)
+    fig_gaze.update_yaxes(autorange='reversed')
+    fig_gaze.update_layout(xaxis_title="X Position", yaxis_title="Y Position")
+    st.plotly_chart(fig_gaze, use_container_width=True)
