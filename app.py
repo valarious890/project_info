@@ -1,32 +1,53 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="Video Overview", layout="wide")
-st.title("🎬 30s Video Segment Descriptions")
+st.set_page_config(page_title="Music vs Thriller", layout="wide")
+st.title("🎬 Genre Comparison: Music vs Thriller")
 
 # Load video descriptions
-desc = pd.read_csv("https://drive.google.com/uc?export=download&id=1_5OPeORG8vE2c40G-ceACmnQhwFaj9NQ")
+desc = pd.read_csv("https://drive.google.com/uc?export=download&id=1DkCDAFLUMP3wqioDJEa8aL3YldkQ4nWt")
 
 # Keep only rows where 'ch' is a number
 desc = desc[pd.to_numeric(desc["ch"], errors="coerce").notna()]
 desc["videoNumber"] = desc["ch"].astype(float).astype(int)
 
-# Let user select a video
-selected_video = st.selectbox("🎞️ Select a video segment to view", sorted(desc["videoNumber"].unique()))
+# Clean genre column (optional: make lowercase, strip spaces)
+desc["genre"] = desc["genre"].str.strip().str.lower()
 
-# Show segment metadata
-selected_row = desc[desc["videoNumber"] == selected_video].iloc[0]
-st.markdown(f"""
-### 📝 {selected_row['movie name']}
-⏱️ Duration: {selected_row['length']} seconds  
-🌍 Environment: {selected_row['environment']}  
-""")
+# Define the two genres to compare
+genre1 = "music"
+genre2 = "thriller"
 
-# Save selected video to session state for next page
-st.session_state["selected_video"] = selected_video
+# Filter segments by genre
+music_df = desc[desc["genre"] == genre1]
+thriller_df = desc[desc["genre"] == genre2]
 
-# Navigation button to viewer
-if st.button("🔍 View Gaze Visualization"):
-    st.switch_page("pages/Gaze_Viewer.py")
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("🎵 Music Segments")
+    for _, row in music_df.iterrows():
+        st.markdown(f"""
+        **🎞️ {row['movie name']}**  
+        ⏱️ Duration: {row['length']}s  
+        🌍 Env: {row['environment']}  
+        👁️ Video: `{int(row['videoNumber'])}`  
+        """)
+        if st.button(f"🔍 View Gaze: Music {int(row['videoNumber'])}", key=f"music-{row['videoNumber']}"):
+            st.session_state["selected_video"] = int(row["videoNumber"])
+            st.switch_page("pages/Gaze_Viewer.py")
+
+with col2:
+    st.subheader("🎬 Thriller Segments")
+    for _, row in thriller_df.iterrows():
+        st.markdown(f"""
+        **🎞️ {row['movie name']}**  
+        ⏱️ Duration: {row['length']}s  
+        🌍 Env: {row['environment']}  
+        👁️ Video: `{int(row['videoNumber'])}`  
+        """)
+        if st.button(f"🔍 View Gaze: Thriller {int(row['videoNumber'])}", key=f"thriller-{row['videoNumber']}"):
+            st.session_state["selected_video"] = int(row["videoNumber"])
+            st.switch_page("pages/Gaze_Viewer.py")
 
 
