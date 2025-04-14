@@ -8,11 +8,11 @@ st.title("Music vs Thriller")
 col1, col2 = st.columns([1, 1])
 with col1:
     if st.button("🎵 Go to Music Page"):
-        st.switch_page("Music Only")  # Adjust this if your filename is different
+        st.switch_page("Music_Only")
 
 with col2:
     if st.button("🎬 Go to Thriller Page"):
-        st.switch_page("Thriller Only")
+        st.switch_page("Thriller_Only")
 
 # Load the filtered genre dataset
 url = "https://drive.google.com/uc?export=download&id=1DkCDAFLUMP3wqioDJEa8aL3YldkQ4nWt"  # replace if needed
@@ -120,3 +120,5 @@ env_fig = px.bar(
 )
 st.plotly_chart(env_fig, use_container_width=True)
 
+import streamlit as st
+st.write(st.runtime.scriptrunner.script_run_context.get_script_run_context().pages)
