@@ -71,55 +71,39 @@ st.plotly_chart(fig4, use_container_width=True)
 # --- Section 4: Fixation & Gaze Viewer ---
 st.header("👁️ Fixation & Gaze Visualization")
 
-# --- Styled Toggle Selector for Genre ---
+# --- Genre Toggle Styled as Tabs ---
 st.markdown("""
 <style>
-.toggle-container {
-    display: flex;
+div[data-baseweb="radio"] > div {
+    flex-direction: row !important;
     justify-content: center;
-    margin-bottom: 1rem;
 }
-.toggle-button {
-    flex: 1;
-    padding: 0.75rem;
-    text-align: center;
+div[role="radiogroup"] > div {
+    margin-right: 1rem;
+    border: 1px solid #999;
+    padding: 0.5rem 1.5rem;
+    border-radius: 10px;
+    background-color: #ddd;
     font-weight: bold;
-    background-color: #ccc;
     color: black;
-    border: none;
     cursor: pointer;
 }
-.toggle-button.selected {
+div[role="radiogroup"] > div[data-selected="true"] {
     background-color: #5bc0de;
+    color: black;
+    border: 2px solid #4aa4c4;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# --- Genre Selector Logic ---
-if "genre_selected" not in st.session_state:
-    st.session_state.genre_selected = "music"
-
-selected_genre = st.session_state.genre_selected
-
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("music"):
-        st.session_state.genre_selected = "music"
-with col2:
-    if st.button("thriller"):
-        st.session_state.genre_selected = "thriller"
-
-# --- Toggle Highlight (force refresh with rerun) ---
-st.markdown(f"""
-<div class="toggle-container">
-    <div class="toggle-button {'selected' if st.session_state.genre_selected == 'music' else ''}">music</div>
-    <div class="toggle-button {'selected' if st.session_state.genre_selected == 'thriller' else ''}">thriller</div>
-</div>
-""", unsafe_allow_html=True)
-
-# Use the selected genre
-genre_selected = st.session_state.genre_selected
-
+# Use st.radio with horizontal layout (acts like toggle)
+genre_selected = st.radio(
+    "🎵 Choose Genre",
+    options=["music", "thriller"],
+    index=0 if "genre_selected" not in st.session_state else ["music", "thriller"].index(st.session_state.genre_selected),
+    horizontal=True,
+    key="genre_selected"
+)
 
 # --- Filter video numbers ---
 video_options = sorted(gaze[gaze["genre_label"] == genre_selected]["videoNumber"].unique())
