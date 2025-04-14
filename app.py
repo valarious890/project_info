@@ -3,7 +3,10 @@ import pandas as pd
 import plotly.express as px
 
 st.set_page_config(page_title="Music vs Thriller Comparison", layout="wide")
-st.title("Music vs Thriller")
+st.markdown(
+    "<h2 style='text-align: center; padding-top: 10px;'>Music or Thriller ?</h1>", 
+    unsafe_allow_html=True
+)
 
 # Dark mode
 st.markdown("""
@@ -51,8 +54,11 @@ gaze = gaze.merge(df[["videoNumber", "genre_label", "movie name"]], on="videoNum
 x_min, x_max = gaze["x"].min(), gaze["x"].max()
 y_min, y_max = gaze["y"].min(), gaze["y"].max()
 
-# --- Section: Radar Chart ---
-st.header("📈 Radar Chart: Feature Profiles")
+# --- Section: Radar Chart Only ---
+st.markdown(
+    "<h2 style='text-align: center; padding-top: 20px;'>📈 Radar Chart: Feature Profiles</h2>", 
+    unsafe_allow_html=True
+)
 
 radar_cols = ["faces (0-5)", "human figures (0-5)", "nature (0-5)",
               "man-made objects (0-5)", "light (0-5)", "aud. Info"]
@@ -63,14 +69,23 @@ radar_summary = radar_summary.rename(columns={
 })
 melted_radar = radar_summary.melt(id_vars="genre_label", var_name="Feature", value_name="Average Score")
 
+# Set color sequence explicitly
+color_map = {"music": "#71C8E2", "thriller": "#F14C2E"}
 fig_radar = px.line_polar(
     melted_radar, r="Average Score", theta="Feature", color="genre_label",
-    line_close=True, markers=True,
-    title="🎯 Feature Comparison: Music vs Thriller",
+    line_close=True, markers=True, title="🎯 Feature Comparison: Music vs Thriller",
     range_r=[0, 5],
-    color_discrete_map={"music": "#71C8E2", "thriller": "#F14C2E"}
+    color_discrete_map=color_map
 )
-st.plotly_chart(fig_radar, use_container_width=True)
+
+# Rename legend label
+fig_radar.update_layout(legend_title_text="Genre")
+
+# Padding with column spacing
+left, center, right = st.columns([1, 6, 1])
+with center:
+    st.plotly_chart(fig_radar, use_container_width=True)
+
 
 # --- Section: Box Plot for # Cuts ---
 st.header("🎬 Distribution of Shot Cuts")
