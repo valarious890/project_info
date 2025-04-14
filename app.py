@@ -5,14 +5,35 @@ import plotly.express as px
 st.set_page_config(page_title="Music vs Thriller Comparison", layout="wide")
 st.title("Music vs Thriller")
 
-# Custom page background color
+# Force dark theme styling
 st.markdown("""
-<style>
-body {
-    background-color: #312D2D !important;
-    color: white;
-}
-</style>
+    <style>
+    body {
+        background-color: #1e1e1e;
+        color: white;
+    }
+    .reportview-container {
+        background-color: #1e1e1e;
+        color: white;
+    }
+    .sidebar .sidebar-content {
+        background-color: #1e1e1e;
+    }
+    .st-bb, .st-at, .st-c3, .st-ag, .st-af, .st-dv {
+        background-color: #1e1e1e;
+        color: white;
+    }
+    .st-cq, .st-da, .st-db, .st-dc, .st-dd, .st-de {
+        background-color: #262730;
+    }
+    .css-1v3fvcr {
+        background-color: #1e1e1e;
+    }
+    .stTextInput > div > div > input {
+        background-color: #262730;
+        color: white;
+    }
+    </style>
 """, unsafe_allow_html=True)
 
 # --- Load Data ---
