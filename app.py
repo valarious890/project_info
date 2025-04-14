@@ -8,11 +8,11 @@ st.title("Music vs Thriller")
 col1, col2 = st.columns([1, 1])
 with col1:
     if st.button("🎵 Go to Music Page"):
-        st.switch_page("Music Page")  # Adjust this if your filename is different
+        st.switch_page("🎵 Music Only Page")  # Adjust this if your filename is different
 
 with col2:
     if st.button("🎬 Go to Thriller Page"):
-        st.switch_page("Thriller Page")
+        st.switch_page("🎵 Thriller Only Page")
 
 # Load the filtered genre dataset
 url = "https://drive.google.com/uc?export=download&id=1DkCDAFLUMP3wqioDJEa8aL3YldkQ4nWt"  # replace if needed
