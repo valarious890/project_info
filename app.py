@@ -82,7 +82,7 @@ fig_radar = px.line_polar(
 fig_radar.update_layout(legend_title_text="Genre")
 
 # Padding with column spacing
-left, center, right = st.columns([1, 3, 1])
+left, center, right = st.columns([1, 10, 1])
 with center:
     st.plotly_chart(fig_radar, use_container_width=True)
 
