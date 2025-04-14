@@ -81,8 +81,8 @@ fig_radar = px.line_polar(
 # Rename legend label
 fig_radar.update_layout(
     legend_title_text="Genre",
-    height=650,  # Increased height
-    width=800,   # Increased width
+    height=500,  # Increased height
+    width=650,   # Increased width
     margin=dict(t=50, b=50, l=50, r=50)
 )
 
