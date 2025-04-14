@@ -12,6 +12,7 @@ df["genre_label"] = df["genre_label"].str.strip().str.lower()
 df["videoNumber"] = df["index"].astype(int)
 
 gaze = pd.read_csv("https://huggingface.co/datasets/valarious890/genre_eye_tracking/resolve/main/fixation_eye_tracking.csv")
+
 gaze = gaze[gaze["missing"] == 0]
 gaze["videoNumber"] = gaze["videoNumber"].astype(int)
 
