@@ -2,7 +2,17 @@ import streamlit as st
 import pandas as pd
 
 st.set_page_config(page_title="Music vs Thriller Comparison", layout="wide")
-st.title("🎬 Genre Comparison: Music vs Thriller")
+st.title("Music vs Thriller")
+
+# Genre page buttons (placed directly below the title)
+col1, col2 = st.columns([1, 1])
+with col1:
+    if st.button("🎵 Go to Music Page"):
+        st.switch_page("pages/Music_Only.py")  # Adjust this if your filename is different
+
+with col2:
+    if st.button("🎬 Go to Thriller Page"):
+        st.switch_page("pages/Thriller_Only.py")
 
 # Load the filtered genre dataset
 url = "https://drive.google.com/uc?export=download&id=1DkCDAFLUMP3wqioDJEa8aL3YldkQ4nWt"  # replace if needed
@@ -110,38 +120,3 @@ env_fig = px.bar(
 )
 st.plotly_chart(env_fig, use_container_width=True)
 
-# Bottom sticky navigation bar
-import streamlit.components.v1 as components
-
-# Render styled buttons in the sticky footer
-st.markdown("""
-<style>
-div.stButton > button {
-    margin: 0 15px;
-}
-.sticky-footer-container {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: #f0f2f6;
-    border-top: 1px solid #ddd;
-    padding: 10px 0;
-    z-index: 9999;
-    display: flex;
-    justify-content: center;
-}
-</style>
-<div class="sticky-footer-container">
-""", unsafe_allow_html=True)
-
-col1, col2 = st.columns([1, 1])
-with col1:
-    if st.button("🎵 Go to Music Page"):
-        st.switch_page("pages/Music_Only.py")
-
-with col2:
-    if st.button("🎬 Go to Thriller Page"):
-        st.switch_page("pages/Thriller_Only.py")
-
-st.markdown("</div>", unsafe_allow_html=True)
