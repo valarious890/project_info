@@ -111,3 +111,33 @@ env_fig = px.bar(
 st.plotly_chart(env_fig, use_container_width=True)
 
 
+#sub pages
+# Bottom sticky navigation bar
+st.markdown("""
+<style>
+.sticky-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #f0f2f6;
+    padding: 10px 20px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    z-index: 9999;
+}
+.sticky-footer a {
+    text-decoration: none;
+    font-weight: bold;
+    color: #1f77b4;
+    font-size: 16px;
+}
+</style>
+
+<div class="sticky-footer">
+    <a href="/Music_Only" target="_self">🎵 Music Page</a>
+    <a href="/Thriller_Only" target="_self">🎬 Thriller Page</a>
+</div>
+""", unsafe_allow_html=True)
