@@ -18,6 +18,8 @@ gaze["videoNumber"] = gaze["videoNumber"].astype(int)
 
 # Merge genre label into gaze data
 gaze = gaze.merge(df[["videoNumber", "genre_label", "movie name"]], on="videoNumber", how="left")
+st.write(gaze[["x", "y"]].describe())
+
 
 # --- Section: Radar Chart Only ---
 st.header("📈 Radar Chart: Feature Profiles")
@@ -115,15 +117,15 @@ if fixation_filtered.empty:
 else:
     movie_name = df[df["videoNumber"] == selected_video]["movie name"].values[0]
 
-    # Animated scatter by timestamp
+    # scatter by timestamp
     fig_fix = px.scatter(
         fixation_filtered,
         x="x", y="y", color="fixation_label", size="duration",
-        animation_frame="timestamp",
         title=f"Fixation Plot - {genre_selected.title()} | {movie_name} | Video {selected_video}, Observer {selected_mapped}",
         height=500,
         color_discrete_map={"fixation": "red", "non-fixation": "gray"}
     )
+
     fig_fix.update_yaxes(autorange="reversed")
     fig_fix.update_layout(xaxis_title="X", yaxis_title="Y")
     st.plotly_chart(fig_fix, use_container_width=True)
