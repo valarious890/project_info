@@ -43,3 +43,39 @@ fig = px.bar(
 fig.update_layout(xaxis_tickangle=-45)
 st.plotly_chart(fig, use_container_width=True)
 
+import plotly.express as px
+
+st.header("📈 Radar Chart: Feature Profiles")
+
+# Compute mean values for each genre
+feature_cols = [
+    "faces (0-5)", "human figures (0-5)", "nature (0-5)",
+    "man-made objects (0-5)", "light (0-5)", "aud. Info"
+]
+genre_summary = df.groupby("genre_label")[feature_cols].mean().reset_index()
+
+# Rename columns for readability
+genre_summary = genre_summary.rename(columns={
+    "faces (0-5)": "Faces",
+    "human figures (0-5)": "Humans",
+    "nature (0-5)": "Nature",
+    "man-made objects (0-5)": "Objects",
+    "light (0-5)": "Light",
+    "aud. Info": "Audio"
+})
+
+# Melt for radar plot
+melted = genre_summary.melt(id_vars="genre_label", var_name="Feature", value_name="Average Score")
+
+# Radar plot
+fig = px.line_polar(
+    melted,
+    r="Average Score",
+    theta="Feature",
+    color="genre_label",
+    line_close=True,
+    markers=True,
+    title="🎯 Feature Comparison: Music vs Thriller"
+)
+
+st.plotly_chart(fig, use_container_width=True)
