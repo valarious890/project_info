@@ -78,21 +78,60 @@ st.plotly_chart(fig4, use_container_width=True)
 # === Section 5: Fixation & Gaze Viewer ===
 st.header("👁️ Fixation & Gaze Visualization")
 
-# === Genre Selector ===
-genre_selected = st.radio(
-    "Select Genre",
-    options=gaze["genre_label"].dropna().unique().tolist(),
-    index=0,
-    horizontal=True
-)
+# === Genre Selector UI with Custom CSS ===
+st.markdown("""
+<style>
+.genre-selector {
+    display: flex;
+    margin-bottom: 1rem;
+}
+.genre-tab {
+    flex: 1;
+    padding: 0.75rem;
+    text-align: center;
+    font-weight: bold;
+    color: black;
+    background-color: #ccc;
+    cursor: pointer;
+    border-radius: 0;
+}
+.genre-tab.selected {
+    background-color: #5bc0de;
+    color: black;
+}
+</style>
+""", unsafe_allow_html=True)
 
-# === Filter video numbers based on selected genre (from gaze data) ===
+# === Genre Selection Logic ===
+genres = ["music", "thriller"]
+selected_genre = st.session_state.get("selected_genre", genres[0])
+
+# Create fake buttons
+genre_cols = st.columns(len(genres))
+for i, g in enumerate(genres):
+    if genre_cols[i].button(f"{g}", key=f"genre_{g}"):
+        st.session_state.selected_genre = g
+        selected_genre = g
+
+# Load data (assuming already loaded above)
+# genre_selected is now:
+genre_selected = selected_genre
+
+# === Filter video numbers based on selected genre ===
 video_options = sorted(gaze[gaze["genre_label"] == genre_selected]["videoNumber"].unique())
 selected_video = st.selectbox("🎞️ Select Video Number", video_options)
 
-# === Observer options filtered by video number ===
-observer_options = sorted(gaze[(gaze["videoNumber"] == selected_video)]["observer"].unique())
-selected_observer = st.selectbox("👁️ Select Observer", observer_options)
+# === Observer mapping: assign 1, 2, 3… per video number ===
+video_obs = gaze[gaze["videoNumber"] == selected_video]["observer"].unique()
+observer_map = {orig: f"{i+1}" for i, orig in enumerate(sorted(video_obs))}
+gaze["observer_mapped"] = gaze["observer"].map(observer_map)
+
+# Select observer by 1, 2, 3
+selected_mapped = st.selectbox("👁️ Select Observer", sorted(observer_map.values()))
+
+# Get original observer name from mapped
+reverse_map = {v: k for k, v in observer_map.items()}
+selected_observer = reverse_map[selected_mapped]
 
 # === Filter gaze data ===
 gaze_filtered = gaze[(gaze["videoNumber"] == selected_video) & (gaze["observer"] == selected_observer)]
@@ -103,7 +142,7 @@ if gaze_filtered.empty:
 else:
     fig_gaze = px.scatter(
         gaze_filtered, x="x", y="y", size="pa", color="t_sec", animation_frame="t_sec",
-        title=f"Animated Fixation - {genre_selected.title()} | Video {selected_video}, Observer {selected_observer}",
+        title=f"Animated Fixation - {genre_selected.title()} | Video {selected_video}, Observer {selected_mapped}",
         height=500, color_continuous_scale="Viridis"
     )
     fig_gaze.update_yaxes(autorange='reversed')
