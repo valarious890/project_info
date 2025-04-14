@@ -18,6 +18,7 @@ gaze["videoNumber"] = gaze["videoNumber"].astype(int)
 
 # Merge genre label into gaze data
 gaze = gaze.merge(df[["videoNumber", "genre_label"]], on="videoNumber", how="left")
+st.write(gaze.head())
 
 # --- Section 1: Feature Comparison ---
 st.header("📊 Visual & Audio Feature Comparison")
@@ -105,16 +106,22 @@ genre_selected = st.radio(
     key="genre_selected"
 )
 
-# --- Filter video numbers ---
-video_options = sorted(gaze[gaze["genre_label"] == genre_selected]["videoNumber"].unique())
+# === Filter video numbers based on selected genre ===
+video_options = sorted(gaze[gaze["genre_label"] == genre_selected]["videoNumber"].unique(), key=int)
 selected_video = st.selectbox("🎞️ Select Video Number", video_options)
 
-# --- Observer Mapping (1,2,3...) ---
-video_obs = gaze[gaze["videoNumber"] == selected_video]["observer"].unique()
-observer_map = {orig: f"{i+1}" for i, orig in enumerate(sorted(video_obs))}
+# === Observer mapping: assign 1, 2, 3… per video number ===
+video_obs = sorted(gaze[gaze["videoNumber"] == selected_video]["observer"].unique())
+observer_map = {orig: f"{i+1}" for i, orig in enumerate(video_obs)}
 gaze["observer_mapped"] = gaze["observer"].map(observer_map)
-selected_mapped = st.selectbox("👁️ Select Observer", sorted(observer_map.values()))
-selected_observer = {v: k for k, v in observer_map.items()}[selected_mapped]
+
+# Observer dropdown (sorted)
+mapped_obs_options = sorted(observer_map.values(), key=int)
+selected_mapped = st.selectbox("👁️ Select Observer", mapped_obs_options)
+
+# Reverse lookup
+reverse_map = {v: k for k, v in observer_map.items()}
+selected_observer = reverse_map[selected_mapped]
 
 # --- Filter and Plot ---
 gaze_filtered = gaze[(gaze["videoNumber"] == selected_video) & (gaze["observer"] == selected_observer)]
@@ -122,11 +129,15 @@ gaze_filtered = gaze[(gaze["videoNumber"] == selected_video) & (gaze["observer"]
 if gaze_filtered.empty:
     st.warning("No gaze data available for this combination.")
 else:
+    # Get the movie name from df using video number
+    movie_name = df[df["videoNumber"] == selected_video]["movie name"].values[0]
+
     fig_gaze = px.scatter(
-        gaze_filtered, x="x", y="y", size="pa", color="t_sec", animation_frame="t_sec",
-        title=f"Fixation Plot - {genre_selected.title()} | Video {selected_video}, Observer {selected_mapped}",
-        height=500, color_continuous_scale="Viridis"
-    )
+    gaze_filtered, x="x", y="y", size="pa", color="t_sec", animation_frame="t_sec",
+    title=f"Fixation Plot - {genre_selected.title()} | {movie_name} | Video {selected_video}, Observer {selected_mapped}",
+    height=500, color_continuous_scale="Viridis"
+    )   
+
     fig_gaze.update_yaxes(autorange='reversed')
     fig_gaze.update_layout(xaxis_title="X", yaxis_title="Y")
     st.plotly_chart(fig_gaze, use_container_width=True)
