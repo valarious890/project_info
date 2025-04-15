@@ -40,7 +40,7 @@ df["genre_label"] = df["genre_label"].str.strip().str.lower()
 df["videoNumber"] = df["index"].astype(int)
 
 # Fixation data
-gaze = pd.read_csv("https://huggingface.co/datasets/valarious890/genre_eye_tracking/resolve/main/fixation_eye_tracking.csv")
+gaze = pd.read_csv("https://huggingface.co/datasets/valarious890/info/resolve/main/fixation_eye_tracking.csv")
 gaze = gaze[gaze["missing"] == 0]
 gaze = gaze[(gaze['x'] >= 0) & (gaze['y'] >= 0)]
 gaze["videoNumber"] = gaze["videoNumber"].astype(int)
@@ -184,4 +184,5 @@ else:
             xaxis_range=[x_min, x_max], yaxis_range=[y_max, y_min]
         )
         st.plotly_chart(fig_avg, use_container_width=True)
+
 
