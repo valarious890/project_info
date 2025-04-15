@@ -191,7 +191,7 @@ else:
     )
 
     fig_gaze.update_layout(
-        title_text=f"Fixation Plot - {genre_selected.title()} | {movie_name} | Video {selected_video}, Observer {selected_mapped}",
+        title_text=f"Gaze Plot - {genre_selected.title()} | {movie_name} | Video {selected_video}, Observer {selected_mapped}",
         title_y=0.97,  # Push title down slightly
         margin=dict(t=100),  # Increase top margin to prevent overlap
         xaxis=dict(
