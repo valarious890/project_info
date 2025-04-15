@@ -84,23 +84,7 @@ fig_radar.update_layout(
     height=500,
     width=650,
     margin=dict(t=50, b=50, l=50, r=50),
-    paper_bgcolor="#0E0E10",   # match Streamlit dark background
-    plot_bgcolor="#0E0E10",
-    font=dict(color="white"),
-    polar=dict(
-        bgcolor="#0E0E10",
-        radialaxis=dict(
-            gridcolor="gray",
-            linecolor="gray",
-            tickfont=dict(color="white"),
-            tickangle=0,
-        ),
-        angularaxis=dict(
-            gridcolor="gray",
-            linecolor="gray",
-            tickfont=dict(color="white")
-        )
-    )
+    font=dict(color="black"),
 )
 
 
@@ -119,13 +103,13 @@ fig_box = px.box(
     y="# cuts",
     color="genre_label",
     category_orders={"genre_label": ["music", "thriller"]},
-    title="Box Plot of # Cuts by Genre",
+    title="Box Plot of Number of Cuts by Genre",
     color_discrete_map={"music": "#71C8E2", "thriller": "#F14C2E"},  # Show individual points
 )
 
 fig_box.update_layout(
     xaxis_title="Genre",
-    yaxis_title="# Cuts"
+    yaxis_title="Number of Cuts"
 )
 
 st.plotly_chart(fig_box, use_container_width=True)
@@ -213,7 +197,7 @@ else:
         height=500,
         color_discrete_map={"fixation": "#F14C2E", "non-fixation": "#AAAAAA"}
     )
-    fig_fix.update_yaxes(autorange="reversed")
+
     fig_fix.update_layout(
         xaxis_range=[x_min, x_max], yaxis_range=[y_max, y_min],
         xaxis_title="X", yaxis_title="Y"
