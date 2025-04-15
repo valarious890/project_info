@@ -4,11 +4,11 @@ import plotly.express as px
 
 st.set_page_config(page_title="Music vs Thriller Comparison", layout="wide")
 st.markdown(
-    "<h2 style='text-align: center; padding-top: 10px;'>Music or Thriller ?</h2>", 
+    "<h1 style='text-align: center; padding-top: 10px; font-size: 48px;'>Music or Thriller ?</h1>", 
     unsafe_allow_html=True
 )
 
-# Dark toggle styling
+# --- Dark Toggle Style ---
 st.markdown("""
 <style>
 div[data-baseweb="radio"] > div {
@@ -39,18 +39,18 @@ df = pd.read_csv(genre_url)
 df["genre_label"] = df["genre_label"].str.strip().str.lower()
 df["videoNumber"] = df["index"].astype(int)
 
-# Fixation data
 gaze = pd.read_csv("https://huggingface.co/datasets/valarious890/info/resolve/main/fixation_eye_tracking.csv")
 gaze = gaze[gaze["missing"] == 0]
 gaze = gaze[(gaze['x'] >= 0) & (gaze['y'] >= 0)]
 gaze["videoNumber"] = gaze["videoNumber"].astype(int)
 gaze = gaze.merge(df[["videoNumber", "genre_label", "movie name"]], on="videoNumber", how="left")
 
-# Global axis limits
 x_min, x_max = gaze["x"].min(), gaze["x"].max()
 y_min, y_max = gaze["y"].min(), gaze["y"].max()
 
 # === Radar Chart ===
+st.subheader("🎯 Visual and Audio Feature Profiles by Genre")
+
 radar_cols = ["faces (0-5)", "human figures (0-5)", "nature (0-5)",
               "man-made objects (0-5)", "light (0-5)", "aud. Info"]
 radar_summary = df.groupby("genre_label")[radar_cols].mean().reset_index()
@@ -69,6 +69,7 @@ fig_radar = px.line_polar(
     color_discrete_map=color_map
 )
 fig_radar.update_layout(
+    title_text="",
     legend_title_text="Genre",
     height=500,
     width=650,
@@ -79,13 +80,14 @@ fig_radar.update_layout(
         radialaxis=dict(tickfont=dict(color="black"), gridcolor="#444", linecolor="black")
     )
 )
-
 left, center, right = st.columns([1, 10, 1])
 with center:
     st.plotly_chart(fig_radar, use_container_width=True)
 
-# === Light Category Bar Plot ===
-light_counts = df.groupby(["genre_label", "light category"]).size().reset_index(name="Count")
+# === Light Category Plot ===
+st.subheader("💡 Light Category Distribution")
+
+light_counts = df.dropna(subset=["light category"]).groupby(["genre_label", "light category"]).size().reset_index(name="Count")
 light_counts["Genre"] = light_counts["genre_label"]
 light_counts["Light Category"] = light_counts["light category"].str.capitalize()
 light_counts["Light Category"] = pd.Categorical(
@@ -93,23 +95,29 @@ light_counts["Light Category"] = pd.Categorical(
 )
 fig3 = px.bar(
     light_counts, x="Light Category", y="Count", color="Genre",
-    barmode="group", title="Distribution of Light Category by Genre",
+    barmode="group",
     color_discrete_map=color_map
 )
+fig3.update_layout(title_text="")
 st.plotly_chart(fig3, use_container_width=True)
 
-# === Environment Bar Plot ===
+# === Environment Plot ===
+st.subheader("🌍 Environment Distribution")
+
 env_counts = df.groupby(["genre_label", "environment"]).size().reset_index(name="Count")
 env_counts["Genre"] = env_counts["genre_label"]
 env_counts["Environment"] = env_counts["environment"].str.capitalize()
 fig4 = px.bar(
     env_counts, x="Environment", y="Count", color="Genre",
-    barmode="group", title="Distribution of Environment by Genre",
+    barmode="group",
     color_discrete_map=color_map
 )
+fig4.update_layout(title_text="")
 st.plotly_chart(fig4, use_container_width=True)
 
 # === Box Plot for # Cuts ===
+st.subheader("🎬 Shot Frequency: Number of Cuts")
+
 df["Genre"] = df["genre_label"]
 fig_box = px.box(
     df,
@@ -117,23 +125,18 @@ fig_box = px.box(
     y="# cuts",
     color="Genre",
     category_orders={"Genre": ["music", "thriller"]},
-    title="Shot Frequency: Number of Cuts by Genre",
-    color_discrete_map=color_map,
+    color_discrete_map=color_map
 )
-fig_box.update_layout(
-    xaxis_title="Genre",
-    yaxis_title="Number of Cuts"
-)
+fig_box.update_layout(title_text="", xaxis_title="Genre", yaxis_title="Number of Cuts")
 st.plotly_chart(fig_box, use_container_width=True)
 
 # === Fixation Viewer ===
-st.header("Fixation & Gaze Visualization")
+st.subheader("👁️ Fixation and Gaze Viewer")
 
-# Genre toggle
 genre_selected = st.radio(
     "Genre",
     options=["music", "thriller"],
-    index=0 if "genre_selected" not in st.session_state else ["music", "thriller"].index(st.session_state.genre_selected),
+    index=0,
     horizontal=True,
     key="genre_selected"
 )
@@ -150,22 +153,22 @@ selected_mapped = st.selectbox("Select Observer", mapped_obs_options)
 reverse_map = {v: k for k, v in observer_map.items()}
 selected_observer = reverse_map[selected_mapped]
 
-fixation_filtered = gaze[
-    (gaze["videoNumber"] == selected_video) & (gaze["observer"] == selected_observer)
-]
+fixation_filtered = gaze[(gaze["videoNumber"] == selected_video) & (gaze["observer"] == selected_observer)]
 
 if fixation_filtered.empty:
     st.warning("No fixation data available for this combination.")
 else:
     movie_name = df[df["videoNumber"] == selected_video]["movie name"].values[0]
+
+    st.subheader("🎯 Fixation Plot")
     fig_fix = px.scatter(
         fixation_filtered,
         x="x", y="y", color="fixation_label", size="duration",
-        title=f"Fixation Plot - {genre_selected.title()} | {movie_name} | Video {selected_video}, Observer {selected_mapped}",
         height=500,
         color_discrete_map={"fixation": "#F14C2E", "non-fixation": "#AAAAAA"}
     )
     fig_fix.update_layout(
+        title_text="",
         xaxis_range=[x_min, x_max], yaxis_range=[y_max, y_min],
         xaxis_title="X", yaxis_title="Y"
     )
@@ -173,16 +176,20 @@ else:
 
     fixation_only = fixation_filtered[fixation_filtered["fixation_label"] == "fixation"]
     if not fixation_only.empty:
-        st.subheader("📍 Average Fixation Locations")
+        st.subheader("📍 Average Fixation Centroids")
         fig_avg = px.scatter(
             fixation_only, x="avg_x", y="avg_y", color="duration", size="duration",
-            color_continuous_scale="Plasma", title="Average Fixation Centroids",
+            color_continuous_scale="Plasma",
             labels={"avg_x": "Avg X", "avg_y": "Avg Y"}
         )
-        fig_avg.update_yaxes(autorange="reversed")
         fig_avg.update_layout(
+            title_text="",
             xaxis_range=[x_min, x_max], yaxis_range=[y_max, y_min]
         )
+        fig_avg.update_yaxes(autorange="reversed")
         st.plotly_chart(fig_avg, use_container_width=True)
+
+
+
 
 
