@@ -49,7 +49,7 @@ x_min, x_max = gaze["x"].min(), gaze["x"].max()
 y_min, y_max = gaze["y"].min(), gaze["y"].max()
 
 # === Radar Chart ===
-st.subheader("🎯 Visual and Audio Feature Profiles by Genre")
+st.subheader("Visual and Audio Feature Profiles by Genre")
 
 radar_cols = ["faces (0-5)", "human figures (0-5)", "nature (0-5)",
               "man-made objects (0-5)", "light (0-5)", "aud. Info"]
@@ -85,25 +85,40 @@ with center:
     st.plotly_chart(fig_radar, use_container_width=True)
 
 # === Light Category Plot ===
-st.subheader("💡 Light Category Distribution")
+st.subheader("Light Category Distribution")
 
-light_counts = df.dropna(subset=["light category"]).groupby(["genre_label", "light category"]).size().reset_index(name="Count")
+# Create full grid of genre x category
+genres = df["genre_label"].unique()
+light_levels = ["low", "medium", "high"]
+
+# Create base DataFrame with all combinations
+base = pd.DataFrame([(g, l) for g in genres for l in light_levels], columns=["genre_label", "light category"])
+
+# Get actual counts
+actual = df.dropna(subset=["light category"]).groupby(["genre_label", "light category"]).size().reset_index(name="Count")
+
+# Merge with base to ensure all combinations exist
+light_counts = pd.merge(base, actual, on=["genre_label", "light category"], how="left").fillna(0)
+light_counts["Count"] = light_counts["Count"].astype(int)
+
+# Format columns for plotting
 light_counts["Genre"] = light_counts["genre_label"]
 light_counts["Light Category"] = light_counts["light category"].str.capitalize()
 light_counts["Light Category"] = pd.Categorical(
-    light_counts["Light Category"], categories=["Low", "Mid", "High"], ordered=True
+    light_counts["Light Category"], categories=["Low", "Medium", "High"], ordered=True
 )
+
+# Plot
 fig3 = px.bar(
     light_counts, x="Light Category", y="Count", color="Genre",
     barmode="group",
     color_discrete_map=color_map
 )
-fig3.update_layout(title_text="")
 st.plotly_chart(fig3, use_container_width=True)
 
-# === Environment Plot ===
-st.subheader("🌍 Environment Distribution")
 
+# === Environment Plot ===
+st.subheader("Environment Distribution")
 env_counts = df.groupby(["genre_label", "environment"]).size().reset_index(name="Count")
 env_counts["Genre"] = env_counts["genre_label"]
 env_counts["Environment"] = env_counts["environment"].str.capitalize()
@@ -116,8 +131,7 @@ fig4.update_layout(title_text="")
 st.plotly_chart(fig4, use_container_width=True)
 
 # === Box Plot for # Cuts ===
-st.subheader("🎬 Shot Frequency: Number of Cuts")
-
+st.subheader("Shot Frequency by Genre")
 df["Genre"] = df["genre_label"]
 fig_box = px.box(
     df,
@@ -131,8 +145,7 @@ fig_box.update_layout(title_text="", xaxis_title="Genre", yaxis_title="Number of
 st.plotly_chart(fig_box, use_container_width=True)
 
 # === Fixation Viewer ===
-st.subheader("👁️ Fixation and Gaze Viewer")
-
+st.subheader("Fixation and Gaze Viewer")
 genre_selected = st.radio(
     "Genre",
     options=["music", "thriller"],
@@ -160,36 +173,73 @@ if fixation_filtered.empty:
 else:
     movie_name = df[df["videoNumber"] == selected_video]["movie name"].values[0]
 
-    st.subheader("🎯 Fixation Plot")
-    fig_fix = px.scatter(
+    st.subheader("Gaze Plot")
+    fig_gaze = px.scatter(
         fixation_filtered,
-        x="x", y="y", color="fixation_label", size="duration",
-        height=500,
-        color_discrete_map={"fixation": "#F14C2E", "non-fixation": "#AAAAAA"}
+        x="x", y="y", color="timestamp",
+        color_continuous_scale="Viridis",  # Or choose another like Plasma
+        labels={"timestamp": "Timestamp"},
+        height=500
     )
-    fig_fix.update_layout(
+
+    fig_gaze.update_layout(
         title_text="",
-        xaxis_range=[x_min, x_max], yaxis_range=[y_max, y_min],
-        xaxis_title="X", yaxis_title="Y"
+        xaxis=dict(
+            title="X",
+            side="top",  # Move X-axis to the top
+            range=[x_min, x_max]
+        ),
+        yaxis=dict(
+            title="Y",
+            autorange="reversed",  # Flip Y axis
+            range=[y_max, y_min]
+        ),
+        coloraxis_colorbar=dict(
+            orientation='h',
+            y=-0.3,  # Move legend below chart
+            x=0.5,
+            xanchor='center',
+            title="Timestamp"
+        )
     )
-    st.plotly_chart(fig_fix, use_container_width=True)
+
+    st.plotly_chart(fig_gaze, use_container_width=True)
+
+
 
     fixation_only = fixation_filtered[fixation_filtered["fixation_label"] == "fixation"]
     if not fixation_only.empty:
-        st.subheader("📍 Average Fixation Centroids")
+        st.subheader("Average Fixation Centroids")
+
+        # Choose color based on genre
+        genre_color = "#71C8E2" if genre_selected == "music" else "#F14C2E"
+ 
         fig_avg = px.scatter(
-            fixation_only, x="avg_x", y="avg_y", color="duration", size="duration",
-            color_continuous_scale="Plasma",
-            labels={"avg_x": "Avg X", "avg_y": "Avg Y"}
+            fixation_only,
+            x="avg_x", y="avg_y",
+            size="duration",
+            color_discrete_sequence=["white"],  # all points white-filled
+            labels={"avg_x": "Average X", "avg_y": "Average Y", "duration": "Duration (s)"},
+            height=500
         )
+
+        # Flip Y, keep layout clean, white borders
+        fig_avg.update_traces(
+            marker=dict(
+                color=genre_color,              # genre-based fill color
+                line=dict(width=1.5, color="white")  # white border
+            )
+        )
+
         fig_avg.update_layout(
             title_text="",
-            xaxis_range=[x_min, x_max], yaxis_range=[y_max, y_min]
-        )
-        fig_avg.update_yaxes(autorange="reversed")
-        st.plotly_chart(fig_avg, use_container_width=True)
+            xaxis=dict(title="Avg X", side="top", range=[x_min, x_max]),
+            yaxis=dict(title="Avg Y", autorange="reversed", range=[y_max, y_min]),
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            font_color="white"
+        )    
 
-
-
+st.plotly_chart(fig_avg, use_container_width=True)
 
 
