@@ -191,10 +191,12 @@ else:
     )
 
     fig_gaze.update_layout(
-        title_text="",
+        title_text=f"Fixation Plot - {genre_selected.title()} | {movie_name} | Video {selected_video}, Observer {selected_mapped}",
+        title_y=0.97,  # Push title down slightly
+        margin=dict(t=100),  # Increase top margin to prevent overlap
         xaxis=dict(
             title="X",
-            side="top",  # Move X-axis to the top
+            side="top",
             range=[x_min, x_max]
         ),
         yaxis=dict(
