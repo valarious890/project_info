@@ -4,7 +4,7 @@ import plotly.express as px
 
 st.set_page_config(page_title="Music vs Thriller Comparison", layout="wide")
 st.markdown(
-    "<h1 style='text-align: center; padding-top: 10px; font-size: 48px;'>Music or Thriller ?</h1>", 
+    "<h1 style='text-align: center; padding-top: 10px; font-size: 60px;'>Music or Thriller ?</div>", 
     unsafe_allow_html=True
 )
 
@@ -49,7 +49,7 @@ x_min, x_max = gaze["x"].min(), gaze["x"].max()
 y_min, y_max = gaze["y"].min(), gaze["y"].max()
 
 # === Radar Chart ===
-st.subheader("Visual and Audio Feature Profiles by Genre")
+st.subheader("Visual and Audio Importance Score")
 
 radar_cols = ["faces (0-5)", "human figures (0-5)", "nature (0-5)",
               "man-made objects (0-5)", "light (0-5)", "aud. Info"]
@@ -141,11 +141,14 @@ fig_box = px.box(
     category_orders={"Genre": ["music", "thriller"]},
     color_discrete_map=color_map
 )
-fig_box.update_layout(title_text="", xaxis_title="Genre", yaxis_title="Number of Cuts")
+fig_box.update_layout(title_text="", 
+                      xaxis_title="Genre", 
+                      yaxis_title="Number of Cuts",
+                      showlegend=False)
 st.plotly_chart(fig_box, use_container_width=True)
 
 # === Fixation Viewer ===
-st.subheader("Fixation and Gaze Viewer")
+st.subheader("Gaze and Fixation")
 genre_selected = st.radio(
     "Genre",
     options=["music", "thriller"],
@@ -173,13 +176,14 @@ if fixation_filtered.empty:
 else:
     movie_name = df[df["videoNumber"] == selected_video]["movie name"].values[0]
 
-    st.subheader("Gaze Plot")
+    st.markdown("<h4 style='margin-top: 1.5em;'>Gaze Plot</h4>", unsafe_allow_html=True)
+
     fig_gaze = px.scatter(
         fixation_filtered,
         x="x", y="y", color="timestamp",
         color_continuous_scale="Viridis",  # Or choose another like Plasma
         labels={"timestamp": "Timestamp"},
-        height=500
+        height=600
     )
 
     fig_gaze.update_layout(
@@ -209,7 +213,7 @@ else:
 
     fixation_only = fixation_filtered[fixation_filtered["fixation_label"] == "fixation"]
     if not fixation_only.empty:
-        st.subheader("Average Fixation Centroids")
+        st.markdown("<h4 style='margin-top: 1.5em;'>Average Fixation Centroids</h4>", unsafe_allow_html=True)
 
         # Choose color based on genre
         genre_color = "#71C8E2" if genre_selected == "music" else "#F14C2E"
@@ -220,7 +224,7 @@ else:
             size="duration",
             color_discrete_sequence=["white"],  # all points white-filled
             labels={"avg_x": "Average X", "avg_y": "Average Y", "duration": "Duration (s)"},
-            height=500
+            height=600
         )
 
         # Flip Y, keep layout clean, white borders
