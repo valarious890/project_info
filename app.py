@@ -4,11 +4,11 @@ import plotly.express as px
 
 st.set_page_config(page_title="Music vs Thriller Comparison", layout="wide")
 st.markdown(
-    "<h2 style='text-align: center; padding-top: 10px;'>Music or Thriller ?</h1>", 
+    "<h2 style='text-align: center; padding-top: 10px;'>Music or Thriller ?</h2>", 
     unsafe_allow_html=True
 )
 
-# Dark mode
+# Dark toggle styling
 st.markdown("""
 <style>
 div[data-baseweb="radio"] > div {
@@ -20,7 +20,7 @@ div[role="radiogroup"] > div {
     border: 1px solid #444;
     padding: 0.5rem 1.5rem;
     border-radius: 10px;
-    background-color: #202020;  /* dark gray like the chart */
+    background-color: #202020;
     font-weight: bold;
     color: white;
     cursor: pointer;
@@ -33,7 +33,6 @@ div[role="radiogroup"] > div[data-selected="true"] {
 </style>
 """, unsafe_allow_html=True)
 
-
 # --- Load Data ---
 genre_url = "https://drive.google.com/uc?export=download&id=1DkCDAFLUMP3wqioDJEa8aL3YldkQ4nWt"
 df = pd.read_csv(genre_url)
@@ -42,140 +41,106 @@ df["videoNumber"] = df["index"].astype(int)
 
 # Fixation data
 gaze = pd.read_csv("https://huggingface.co/datasets/valarious890/genre_eye_tracking/resolve/main/fixation_eye_tracking.csv")
-
 gaze = gaze[gaze["missing"] == 0]
 gaze = gaze[(gaze['x'] >= 0) & (gaze['y'] >= 0)]
 gaze["videoNumber"] = gaze["videoNumber"].astype(int)
-
-# Merge genre info
 gaze = gaze.merge(df[["videoNumber", "genre_label", "movie name"]], on="videoNumber", how="left")
 
-# === Global x and y limits ===
+# Global axis limits
 x_min, x_max = gaze["x"].min(), gaze["x"].max()
 y_min, y_max = gaze["y"].min(), gaze["y"].max()
 
-# --- Section: Radar Chart Only ---
-
+# === Radar Chart ===
 radar_cols = ["faces (0-5)", "human figures (0-5)", "nature (0-5)",
               "man-made objects (0-5)", "light (0-5)", "aud. Info"]
 radar_summary = df.groupby("genre_label")[radar_cols].mean().reset_index()
 radar_summary = radar_summary.rename(columns={
-    "faces (0-5)": "Faces", "human figures (0-5)": "Humans", "nature (0-5)": "Nature",
-    "man-made objects (0-5)": "Objects", "light (0-5)": "Light", "aud. Info": "Audio"
+    "genre_label": "Genre", "faces (0-5)": "Faces", "human figures (0-5)": "Humans",
+    "nature (0-5)": "Nature", "man-made objects (0-5)": "Objects",
+    "light (0-5)": "Light", "aud. Info": "Audio"
 })
-melted_radar = radar_summary.melt(id_vars="genre_label", var_name="Feature", value_name="Average Score")
-
-# Set color sequence explicitly
+melted_radar = radar_summary.melt(id_vars="Genre", var_name="Feature", value_name="Average Score")
 color_map = {"music": "#71C8E2", "thriller": "#F14C2E"}
+
 fig_radar = px.line_polar(
-    melted_radar, r="Average Score", theta="Feature", color="genre_label",
-    line_close=True, markers=True, title="Feature Comparison: Music vs Thriller",
+    melted_radar, r="Average Score", theta="Feature", color="Genre",
+    line_close=True, markers=True,
     range_r=[0, 5],
     color_discrete_map=color_map
 )
-
-# Rename legend label
 fig_radar.update_layout(
     legend_title_text="Genre",
     height=500,
     width=650,
     margin=dict(t=50, b=50, l=50, r=50),
-    font=dict(color="white"),  # <- This controls text color including axis labels
+    font=dict(color="white"),
     polar=dict(
-        angularaxis=dict(
-            tickfont=dict(color="white")  # <- Make feature names white
-        ),
-        radialaxis=dict(
-            tickfont=dict(color="black"),  # <- Make the 1-5 scale white
-            gridcolor="#444",              # <- Optional: darken grid lines
-            linecolor="black",             # <- Optional: axis line color
-        )
+        angularaxis=dict(tickfont=dict(color="white")),
+        radialaxis=dict(tickfont=dict(color="black"), gridcolor="#444", linecolor="black")
     )
 )
 
-
-
-# Padding with column spacing
 left, center, right = st.columns([1, 10, 1])
 with center:
     st.plotly_chart(fig_radar, use_container_width=True)
 
-
-# --- Section: Visual Style ---
-light_counts = df.groupby(["genre_label", "light category"]).size().reset_index(name="count")
-fig3 = px.bar(light_counts, x="light category", y="count", color="genre_label",
-              barmode="group", title="Light Category Frequency",
-              color_discrete_map={"music": "#71C8E2", "thriller": "#F14C2E"})
+# === Light Category Bar Plot ===
+light_counts = df.groupby(["genre_label", "light category"]).size().reset_index(name="Count")
+light_counts["Genre"] = light_counts["genre_label"]
+light_counts["Light Category"] = light_counts["light category"].str.capitalize()
+light_counts["Light Category"] = pd.Categorical(
+    light_counts["Light Category"], categories=["Low", "Mid", "High"], ordered=True
+)
+fig3 = px.bar(
+    light_counts, x="Light Category", y="Count", color="Genre",
+    barmode="group", title="Distribution of Light Category by Genre",
+    color_discrete_map=color_map
+)
 st.plotly_chart(fig3, use_container_width=True)
 
-env_counts = df.groupby(["genre_label", "environment"]).size().reset_index(name="count")
-fig4 = px.bar(env_counts, x="environment", y="count", color="genre_label",
-              barmode="group", title="Environment Frequency",
-              color_discrete_map={"music": "#71C8E2", "thriller": "#F14C2E"})
+# === Environment Bar Plot ===
+env_counts = df.groupby(["genre_label", "environment"]).size().reset_index(name="Count")
+env_counts["Genre"] = env_counts["genre_label"]
+env_counts["Environment"] = env_counts["environment"].str.capitalize()
+fig4 = px.bar(
+    env_counts, x="Environment", y="Count", color="Genre",
+    barmode="group", title="Distribution of Environment by Genre",
+    color_discrete_map=color_map
+)
 st.plotly_chart(fig4, use_container_width=True)
 
-# --- Section: Box Plot for # Cuts ---
-
+# === Box Plot for # Cuts ===
+df["Genre"] = df["genre_label"]
 fig_box = px.box(
     df,
-    x="genre_label",
+    x="Genre",
     y="# cuts",
-    color="genre_label",
-    category_orders={"genre_label": ["music", "thriller"]},
-    title="Box Plot of Number of Cuts by Genre",
-    color_discrete_map={"music": "#71C8E2", "thriller": "#F14C2E"},  # Show individual points
+    color="Genre",
+    category_orders={"Genre": ["music", "thriller"]},
+    title="Shot Frequency: Number of Cuts by Genre",
+    color_discrete_map=color_map,
 )
-
 fig_box.update_layout(
     xaxis_title="Genre",
     yaxis_title="Number of Cuts"
 )
-
 st.plotly_chart(fig_box, use_container_width=True)
 
-# --- Section: Fixation Viewer ---
+# === Fixation Viewer ===
 st.header("Fixation & Gaze Visualization")
 
-# --- Genre Toggle Styled as Tabs ---
-st.markdown("""
-<style>
-div[data-baseweb="radio"] > div {
-   flex-direction: row !important;
-   justify-content: center;
-}
-div[role="radiogroup"] > div {
-   margin-right: 1rem;
-   border: 1px solid #999;
-   padding: 0.5rem 1.5rem;
-   border-radius: 10px;
-   background-color: #ddd;
-   font-weight: bold;
-   color: black;
-   cursor: pointer;
-}
-div[role="radiogroup"] > div[data-selected="true"] {
-   background-color: #5bc0de;
-   color: black;
-   border: 2px solid #4aa4c4;
-}
-</style>
-""", unsafe_allow_html=True)
-
-
-# Use st.radio with horizontal layout (acts like toggle)
+# Genre toggle
 genre_selected = st.radio(
-   "Genre",
-   options=["music", "thriller"],
-   index=0 if "genre_selected" not in st.session_state else ["music", "thriller"].index(st.session_state.genre_selected),
-   horizontal=True,
-   key="genre_selected"
+    "Genre",
+    options=["music", "thriller"],
+    index=0 if "genre_selected" not in st.session_state else ["music", "thriller"].index(st.session_state.genre_selected),
+    horizontal=True,
+    key="genre_selected"
 )
-
 
 video_options = sorted(gaze[gaze["genre_label"] == genre_selected]["videoNumber"].unique())
 selected_video = st.selectbox("Select Video Number", video_options)
 
-# Observer mapping
 video_obs = sorted(gaze[gaze["videoNumber"] == selected_video]["observer"].unique())
 observer_map = {orig: str(i+1) for i, orig in enumerate(video_obs)}
 gaze["observer_mapped"] = gaze["observer"].map(observer_map)
@@ -185,7 +150,6 @@ selected_mapped = st.selectbox("Select Observer", mapped_obs_options)
 reverse_map = {v: k for k, v in observer_map.items()}
 selected_observer = reverse_map[selected_mapped]
 
-# Filter fixation data
 fixation_filtered = gaze[
     (gaze["videoNumber"] == selected_video) & (gaze["observer"] == selected_observer)
 ]
@@ -194,7 +158,6 @@ if fixation_filtered.empty:
     st.warning("No fixation data available for this combination.")
 else:
     movie_name = df[df["videoNumber"] == selected_video]["movie name"].values[0]
-
     fig_fix = px.scatter(
         fixation_filtered,
         x="x", y="y", color="fixation_label", size="duration",
@@ -202,7 +165,6 @@ else:
         height=500,
         color_discrete_map={"fixation": "#F14C2E", "non-fixation": "#AAAAAA"}
     )
-
     fig_fix.update_layout(
         xaxis_range=[x_min, x_max], yaxis_range=[y_max, y_min],
         xaxis_title="X", yaxis_title="Y"
