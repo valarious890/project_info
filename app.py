@@ -233,13 +233,21 @@ else:
 
         fig_avg.update_layout(
             title_text="",
-            xaxis=dict(title="Avg X", side="top", range=[x_min, x_max]),
-            yaxis=dict(title="Avg Y", autorange="reversed", range=[y_max, y_min]),
+            xaxis=dict(title="Average X", side="top", range=[x_min, x_max]),
+            yaxis=dict(title="Average Y", autorange="reversed", range=[y_max, y_min]),
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
             font_color="white"
         )    
 
+        # Add annotation
+        fig_avg.add_annotation(
+            text="Point size reflects fixation duration",
+            xref="paper", yref="paper",
+            x=0.5, y=-0.15,
+            showarrow=False,
+            font=dict(color="white", size=20),
+            xanchor="center"
+        )
+
 st.plotly_chart(fig_avg, use_container_width=True)
-
-
