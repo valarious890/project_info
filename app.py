@@ -45,8 +45,12 @@ gaze = gaze[(gaze['x'] >= 0) & (gaze['y'] >= 0)]
 gaze["videoNumber"] = gaze["videoNumber"].astype(int)
 gaze = gaze.merge(df[["videoNumber", "genre_label", "movie name"]], on="videoNumber", how="left")
 
-x_min, x_max = gaze["x"].min(), gaze["x"].max()
-y_min, y_max = gaze["y"].min(), gaze["y"].max()
+# Ensure same scale across gaze and fixation plots
+x_min = 0
+x_max = max(gaze["x"].max(), gaze["avg_x"].max())
+y_min = 0
+y_max = max(gaze["y"].max(), gaze["avg_y"].max())
+
 
 # === Radar Chart ===
 st.subheader("Visual and Audio Feature Importance")
@@ -238,15 +242,12 @@ else:
         fig_avg.update_layout(
             title_text="",
             xaxis=dict(title="Average X", side="top", range=[x_min, x_max]),
-            yaxis=dict(title="Average Y", autorange="reversed", range=[y_max, y_min]),
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="rgba(0,0,0,0)",
-            font_color="white"
+            yaxis=dict(title="Average Y", autorange="reversed", range=[y_max, y_min])
         )    
 
         # Add annotation
         fig_avg.add_annotation(
-            text="Point size reflects fixation duration",
+            text="Point size reflects fixation duration (s)",
             xref="paper", yref="paper",
             x=0.5, y=-0.15,
             showarrow=False,
