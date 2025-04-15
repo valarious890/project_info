@@ -49,7 +49,7 @@ x_min, x_max = gaze["x"].min(), gaze["x"].max()
 y_min, y_max = gaze["y"].min(), gaze["y"].max()
 
 # === Radar Chart ===
-st.subheader("Visual and Audio Importance Score")
+st.subheader("Visual and Audio Feature Importance")
 
 radar_cols = ["faces (0-5)", "human figures (0-5)", "nature (0-5)",
               "man-made objects (0-5)", "light (0-5)", "aud. Info"]
@@ -131,7 +131,7 @@ fig4.update_layout(title_text="")
 st.plotly_chart(fig4, use_container_width=True)
 
 # === Box Plot for # Cuts ===
-st.subheader("Shot Frequency by Genre")
+st.subheader("Shot Frequency (Number of Cuts)")
 df["Genre"] = df["genre_label"]
 fig_box = px.box(
     df,
@@ -176,7 +176,7 @@ if fixation_filtered.empty:
 else:
     movie_name = df[df["videoNumber"] == selected_video]["movie name"].values[0]
 
-    st.markdown("<h4 style='margin-top: 1.5em;'>Gaze Plot</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='margin-top: 1.5em;'>Gaze Plot by Timestamp</h4>", unsafe_allow_html=True)
 
     fig_gaze = px.scatter(
         fixation_filtered,
